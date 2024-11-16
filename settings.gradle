@@ -1,0 +1,3 @@
+rootProject.name = 'bmim2214-softeng'
+include ':bmim2214-backend'
+include ':bmim2214-desktop'
