@@ -27,7 +27,7 @@ def get_entity(id):
     conn.close()
 
     if entity:
-        return jsonify({'id': entity[0], 'name': entity[1]}), 200
+        return jsonify({'id': entity[0], 'name': entity[1], 'restaurant_id': entity[2]}), 200
     else:
         return jsonify({'error': 'Entity not found'}), 404
 
@@ -42,7 +42,7 @@ def get_all_entities():
     conn.close()
 
     if entities:
-        result = [{'id': entity[0], 'name': entity[1]} for entity in entities]
+        result = [{'id': entity[0], 'name': entity[1], 'restaurant_id': entity[2]} for entity in entities]
         return jsonify(result), 200
     else:
         return jsonify({'error': 'No entities found'}), 404

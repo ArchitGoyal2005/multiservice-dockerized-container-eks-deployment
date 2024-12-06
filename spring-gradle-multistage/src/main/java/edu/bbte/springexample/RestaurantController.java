@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -30,6 +31,6 @@ public class RestaurantController {
         Object server1Restaurant = restTemplate.getForObject(server1Url + "/restaurant/" + id, Object.class);
         Object server2Restaurant = restTemplate.getForObject(server2Url + "/menu/" + id, Object.class);
 
-        return server1Restaurant != null ? server1Restaurant : server2Restaurant;
+        return Arrays.asList(server1Restaurant, server2Restaurant);
     }
 }

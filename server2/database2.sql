@@ -11,10 +11,11 @@ $$;
 
 CREATE TABLE Menu (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    restaurant_id INT NOT NULL
 );
 
-INSERT INTO Menu (name) VALUES
-('burger menu'),
-('sajt menu'),
-('vega menu');
+INSERT INTO Menu (name, restaurant_id) VALUES
+('burger menu', 1),
+('sajt menu', 2),
+('vega menu', 3);
