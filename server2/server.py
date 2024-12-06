@@ -1,11 +1,9 @@
 import os
 from flask import Flask, jsonify
-from flask_httpauth import HTTPBasicAuth
 import psycopg2
 
-# Flask és HTTP Basic Auth inicializálása
+# Flask inicializálása
 app = Flask(__name__)
-auth = HTTPBasicAuth()
 
 # PostgreSQL kapcsolat beállítása
 def get_db_connection():
@@ -18,16 +16,8 @@ def get_db_connection():
     )
     return conn
 
-# Alapértelmezett felhasználói hitelesítés (pl. "admin" felhasználó)
-@auth.verify_password
-def verify_password(username, password):
-    if username == "admin" and password == "adminpassword":
-        return True
-    return False
-
 # Egy entitás lekérése az id alapján
 @app.route('/menu/<int:id>', methods=['GET'])
-@auth.login_required
 def get_entity(id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -43,7 +33,6 @@ def get_entity(id):
 
 # Az összes entitás lekérése
 @app.route('/menus', methods=['GET'])
-@auth.login_required
 def get_all_entities():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -59,5 +48,4 @@ def get_all_entities():
         return jsonify({'error': 'No entities found'}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8081)
-
+    app.run(debug=True, host='0.0.0.0', port=8080)

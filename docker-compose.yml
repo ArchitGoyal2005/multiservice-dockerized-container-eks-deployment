@@ -2,8 +2,6 @@ services:
   web-csharp:
     build:
       context: ./server1
-    ports:
-      - "8080:8080"
     depends_on:
       - db-restaurant
     environment:
@@ -16,7 +14,7 @@ services:
     build:
       context: ./server2
     ports:
-      - "8081:8081"
+      - "8080:8080"
     depends_on:
       - db-menu
     environment:
@@ -24,6 +22,18 @@ services:
       - DB_NAME=menu_db
       - DB_USER=myuser
       - DB_PASSWORD=mypassword
+
+  web-java:
+    build:
+      context: ./spring-gradle-multistage
+    ports:
+      - "8081:8081"
+    depends_on:
+      - web-csharp
+      - web-python
+    environment:
+      - SERVER1_URL=http://web-csharp:8082
+      - SERVER2_URL=http://web-python:8080
 
   db-restaurant:
     image: postgres
