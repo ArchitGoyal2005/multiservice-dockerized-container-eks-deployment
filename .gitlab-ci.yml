@@ -15,15 +15,22 @@ lint_job:
     - dotnet restore
   script:
     - echo "Running Java Checkstyle"
-    - ./gradlew checkstyleMain || echo "Java linting issues found!"
+    - ./gradlew checkstyleMain --stacktrace --info || echo "Java linting issues found!"
+
     - echo "Running C# linter"
     - dotnet format --verify-no-changes || echo "C# linting issues found!"
+
     - echo "Running Python linter"
     - pylint server.py || echo "Python linting issues found!"
   artifacts:
     when: always
     paths:
-      - /builds/benczemarton38/bmim2214
+      - build/reports
+      - pylint.log
+      - bin/Debug
     exclude:
-      - bmim2214/.git
+      - .git
     expire_in: 1 week
+  variables:
+    GIT_CLONE_PATH: "$CI_BUILDS_DIR/bmim2214"
+    FF_NETWORK_PER_BUILD: "true"
