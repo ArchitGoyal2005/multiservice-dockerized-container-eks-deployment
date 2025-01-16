@@ -23,5 +23,5 @@ lint_job:
   artifacts:
     when: always
     paths:
-      - build/reports/
-    expire_in: 1 week
+      - build/reports/checkstyle
+    expire_in: always
