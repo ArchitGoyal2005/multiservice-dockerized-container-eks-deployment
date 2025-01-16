@@ -23,5 +23,5 @@ lint_job:
   artifacts:
     when: always
     paths:
-      - build/reports/checkstyle
+      - /builds/benczemarton38/bmim2214
     expire_in: 1 week
