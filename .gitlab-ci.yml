@@ -24,4 +24,6 @@ lint_job:
     when: always
     paths:
       - /builds/benczemarton38/bmim2214
+    exclude:
+      - bmim2214/.git
     expire_in: 1 week
