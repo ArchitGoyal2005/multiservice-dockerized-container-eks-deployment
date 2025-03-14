@@ -1,36 +1,106 @@
 stages:
   - lint
+  - test
+  - build
+  - report
+  - deploy
 
-lint_job:
+lint_server3:
   stage: lint
-  image: ubuntu:latest
-  before_script:
-    - apt update && apt install -y openjdk-17-jdk dotnet-sdk-8 python3-pip curl unzip
-    - curl -s "https://get.sdkman.io" | bash
-    - export SDKMAN_DIR="$HOME/.sdkman"
-    - source "$SDKMAN_DIR/bin/sdkman-init.sh"
-    - sdk install gradle 8.4
-    - dotnet --version
-    - pip install pylint flake8
-    - dotnet restore
+  image: gradle:8.10.0-jdk21-jammy
   script:
-    - echo "Running Java Checkstyle"
-    - ./gradlew checkstyleMain --stacktrace --info || echo "Java linting issues found!"
+    - cd server3
+    - gradle check
+  except:
+    - release
+  allow_failure: false
 
-    - echo "Running C# linter"
-    - dotnet format --verify-no-changes || echo "C# linting issues found!"
-
-    - echo "Running Python linter"
-    - pylint server.py || echo "Python linting issues found!"
+test_server2:
+  stage: test
+  image: node:18.16.0-alpine
+  script:
+    - cd server2
+    - npm install
+    - npm test
   artifacts:
-    when: always
     paths:
-      - build/reports
-      - pylint.log
-      - bin/Debug
-    exclude:
-      - .git
-    expire_in: 1 week
-  variables:
-    GIT_CLONE_PATH: "$CI_BUILDS_DIR/bmim2214"
-    FF_NETWORK_PER_BUILD: "true"
+      - server2/coverage
+    expire_in: 30 days
+
+build_server1:
+  stage: build
+  image: golang:1.21-alpine
+  script:
+    - cd server1
+    - go mod init server1 && go mod tidy
+    - go build -o server1
+
+build_server2:
+  stage: build
+  image: node:18.16.0-alpine
+  cache:
+    paths:
+      - server2/node_modules
+  script:
+    - cd server2
+    - npm install
+    - npm run
+
+build_server3:
+  stage: build
+  image: gradle:8.10.0-jdk21-jammy
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  cache:
+    paths:
+      - server3/.gradle
+  script:
+    - cd server3
+    - gradle build --console=plain --no-daemon
+
+pages:
+  stage: report
+  image: node:18.16.0-alpine
+  needs:
+    - test_server2
+  script:
+    - mkdir -p public
+    - cp -r server2/coverage/* public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 14 days
+  only:
+    - release
+
+deploy_server1:
+  stage: deploy
+  image: docker:24.0.5
+  services:
+    - docker:dind
+  script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker build -t ${CI_REGISTRY_IMAGE}/server1 ./server1
+    - docker push ${CI_REGISTRY_IMAGE}/server1
+
+deploy_server2:
+  stage: deploy
+  image: docker:24.0.5
+  services:
+    - docker:dind
+  script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker build -t ${CI_REGISTRY_IMAGE}/server2 ./server2
+    - docker push ${CI_REGISTRY_IMAGE}/server2
+  only:
+    - release
+
+deploy_server3:
+  stage: deploy
+  image: docker:24.0.5
+  services:
+    - docker:dind
+  script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker build -t ${CI_REGISTRY_IMAGE}/server3 ./server3
+    - docker push ${CI_REGISTRY_IMAGE}/server3
