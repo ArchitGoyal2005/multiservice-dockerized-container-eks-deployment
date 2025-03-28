@@ -17,7 +17,7 @@ public class RestaurantController {
     private final String server1Url = System.getenv("SERVER1_URL");
     private final String server2Url = System.getenv("SERVER2_URL");
 
-    @GetMapping("/osszes")
+    @GetMapping("/combined")
     public List<Object> getAllRestaurants() {
         List<Object> server1Restaurants = restTemplate.getForObject(server1Url + "/restaurants", List.class);
         List<Object> server2Restaurants = restTemplate.getForObject(server2Url + "/menus", List.class);
@@ -26,7 +26,7 @@ public class RestaurantController {
         return server1Restaurants;
     }
 
-    @GetMapping("/osszes/{id}")
+    @GetMapping("/combined/{id}")
     public Object getRestaurantById(@PathVariable int id) {
         Object server1Restaurant = restTemplate.getForObject(server1Url + "/restaurant/" + id, Object.class);
         Object server2Restaurant = restTemplate.getForObject(server2Url + "/menu/" + id, Object.class);
