@@ -184,11 +184,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/marcibencze/Desktop/softeng/lab2/bmim2214/server1/Server1.csproj",
+      "projectUniqueName": "/Users/marcibencze/Desktop/githubrepos/multi-service-dockerized-system/server1/Server1.csproj",
       "projectName": "Server1",
-      "projectPath": "/Users/marcibencze/Desktop/softeng/lab2/bmim2214/server1/Server1.csproj",
+      "projectPath": "/Users/marcibencze/Desktop/githubrepos/multi-service-dockerized-system/server1/Server1.csproj",
       "packagesPath": "/Users/marcibencze/.nuget/packages/",
-      "outputPath": "/Users/marcibencze/Desktop/softeng/lab2/bmim2214/server1/obj/",
+      "outputPath": "/Users/marcibencze/Desktop/githubrepos/multi-service-dockerized-system/server1/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/marcibencze/.nuget/NuGet/NuGet.Config"

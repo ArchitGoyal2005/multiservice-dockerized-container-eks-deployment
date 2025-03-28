@@ -2,10 +2,10 @@ import os
 from flask import Flask, jsonify
 import psycopg2
 
-# Flask inicializálása
+# Flask init
 app = Flask(__name__)
 
-# PostgreSQL kapcsolat beállítása
+# PostgreSQL connection setting
 def get_db_connection():
     conn = psycopg2.connect(
         dbname=os.getenv("DB_NAME"),
@@ -16,7 +16,7 @@ def get_db_connection():
     )
     return conn
 
-# Egy entitás lekérése az id alapján
+# get entity by id
 @app.route('/menu/<int:id>', methods=['GET'])
 def get_entity(id):
     conn = get_db_connection()
@@ -31,7 +31,7 @@ def get_entity(id):
     else:
         return jsonify({'error': 'Entity not found'}), 404
 
-# Az összes entitás lekérése
+# get all entities
 @app.route('/menus', methods=['GET'])
 def get_all_entities():
     conn = get_db_connection()

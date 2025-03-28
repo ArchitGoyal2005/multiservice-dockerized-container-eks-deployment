@@ -13,7 +13,7 @@ public class RestaurantController {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // Az URL-eket környezeti változókból olvassuk ki
+    // urls from envs
     private final String server1Url = System.getenv("SERVER1_URL");
     private final String server2Url = System.getenv("SERVER2_URL");
 
