@@ -28,13 +28,13 @@ This project implements a backend-focused microservice system using Docker and D
 
 ### web-csharp (internal only)
 
-- `GET /entity/:id` – Retrieve an item by ID
-- `GET /entities` – List all items
+- `GET /restaurant/:id` – Retrieve an item by ID
+- `GET /restaurants` – List all items
 
 ### web-python (accessible externally on port 8080)
 
-- `GET /entity/:id` – Retrieve an item by ID
-- `GET /entities` – List all items
+- `GET /menu/:id` – Retrieve an item by ID
+- `GET /menus` – List all items
 
 ### web-java (aggregator, accessible on port 8081)
 
