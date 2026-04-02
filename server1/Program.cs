@@ -20,7 +20,7 @@ string connectionString = $"Host={dbHost};Database={dbName};Username={dbUser};Pa
 builder.Services.AddScoped<NpgsqlConnection>(_ => new NpgsqlConnection(connectionString));
 
 var app = builder.Build();
-app.Urls.Add("http://0.0.0.0:8082");
+app.Urls.Add("http://0.0.0.0:8080");
 
 // Get restaurant by ID
 app.MapGet("/restaurant/{id:int}", async (int id, NpgsqlConnection dbConnection) =>

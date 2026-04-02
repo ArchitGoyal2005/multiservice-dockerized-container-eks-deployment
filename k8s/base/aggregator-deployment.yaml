@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aggregator-service
+  namespace: default
+  labels:
+    app: aggregator-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aggregator-service
+  template:
+    metadata:
+      labels:
+        app: aggregator-service
+    spec:
+      containers:
+        - name: aggregator-service
+          image: 462590323511.dkr.ecr.us-east-1.amazonaws.com/aggregator-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SERVER1_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: SERVER1_URL
+            - name: SERVER2_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: SERVER2_URL
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "300m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aggregator-service
+  namespace: default
+spec:
+  selector:
+    app: aggregator-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

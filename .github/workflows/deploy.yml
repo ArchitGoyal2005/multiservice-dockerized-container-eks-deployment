@@ -1,0 +1,103 @@
+name: Build and Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+
+jobs:
+  build-and-deploy:
+    name: Build, Push & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # ─── 1. Checkout code ───────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ─── 2. Configure AWS credentials ───────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # ─── 3. Login to ECR ─────────────────────────────────────────
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ─── 4. Build & Push restaurant-service ──────────────────────
+      - name: Build and push restaurant-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/restaurant-service:$IMAGE_TAG ./server1
+          docker tag $ECR_REGISTRY/restaurant-service:$IMAGE_TAG $ECR_REGISTRY/restaurant-service:latest
+          docker push $ECR_REGISTRY/restaurant-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/restaurant-service:latest
+
+      # ─── 5. Build & Push menu-service ────────────────────────────
+      - name: Build and push menu-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/menu-service:$IMAGE_TAG ./server2
+          docker tag $ECR_REGISTRY/menu-service:$IMAGE_TAG $ECR_REGISTRY/menu-service:latest
+          docker push $ECR_REGISTRY/menu-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/menu-service:latest
+
+      # ─── 6. Build & Push aggregator-service ──────────────────────
+      - name: Build and push aggregator-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/aggregator-service:$IMAGE_TAG ./spring-gradle-multistage
+          docker tag $ECR_REGISTRY/aggregator-service:$IMAGE_TAG $ECR_REGISTRY/aggregator-service:latest
+          docker push $ECR_REGISTRY/aggregator-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/aggregator-service:latest
+
+      # ─── 7. Update kubeconfig ─────────────────────────────────────
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ secrets.EKS_CLUSTER_NAME }} \
+            --region ${{ secrets.AWS_REGION }}
+
+      # ─── 8. Deploy to EKS ─────────────────────────────────────────
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Update image tags in deployments
+          kubectl set image deployment/restaurant-service \
+            restaurant-service=$ECR_REGISTRY/restaurant-service:$IMAGE_TAG
+
+          kubectl set image deployment/menu-service \
+            menu-service=$ECR_REGISTRY/menu-service:$IMAGE_TAG
+
+          kubectl set image deployment/aggregator-service \
+            aggregator-service=$ECR_REGISTRY/aggregator-service:$IMAGE_TAG
+
+          # Wait for rollouts to complete
+          kubectl rollout status deployment/restaurant-service --timeout=120s
+          kubectl rollout status deployment/menu-service --timeout=120s
+          kubectl rollout status deployment/aggregator-service --timeout=120s
+
+      # ─── 9. Verify deployment ──────────────────────────────────────
+      - name: Verify deployment
+        run: |
+          kubectl get pods
+          kubectl get services
+          kubectl get ingress

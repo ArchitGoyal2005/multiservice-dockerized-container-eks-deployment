@@ -21,5 +21,9 @@ WORKDIR /app
 # Copy the published application from the build stage
 COPY --from=build /app/out . 
 
+# Tell ASP.NET Core to listen on port 8080
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
 # Define the entry point for the application
 ENTRYPOINT ["dotnet", "Server1.dll"]

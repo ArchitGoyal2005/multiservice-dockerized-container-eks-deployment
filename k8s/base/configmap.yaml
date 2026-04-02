@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: services-config
+  namespace: default
+data:
+  SERVER1_URL: "http://restaurant-service:8080"
+  SERVER2_URL: "http://menu-service:8080"
+  DB_PORT: "5432"

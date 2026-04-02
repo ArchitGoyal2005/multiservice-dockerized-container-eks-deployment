@@ -13,4 +13,7 @@ RUN gradle --no-daemon bootJar
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /usr/app
 COPY --from=build-env /src/build/libs/spring-gradle-multistage.jar ./
+
+EXPOSE 8080
+
 CMD java -jar spring-gradle-multistage.jar

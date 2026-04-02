@@ -43,7 +43,10 @@ def get_all_entities():
 
     if entities:
         result = [{'id': entity[0], 'name': entity[1], 'restaurant_id': entity[2]} for entity in entities]
-        return jsonify(result), 200
+        return jsonify({
+            "status": "pipeline working successfully 🚀",
+            "data": result
+        }), 200
     else:
         return jsonify({'error': 'No entities found'}), 404
 

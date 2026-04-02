@@ -1,0 +1,10 @@
+# Kubernetes secrets - never commit these
+k8s/base/secrets.yaml
+
+# Infrastructure setup files - one time use only
+alb-iam-policy.json
+patch.json
+
+# Other sensitive files
+*.env
+.env
